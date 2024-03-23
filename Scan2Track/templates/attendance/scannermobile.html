@@ -1,0 +1,57 @@
+<!-- scan_mark.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan and Mark Attendance</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/1.2.2/html5-qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/1.2.2/html5-qrcode.min.css">
+</head>
+<body>
+    <h1>Scan and Mark Attendance</h1>
+
+    <div id="qr-reader"></div>
+    <div id="result"></div>
+
+    <script>
+        function onScanSuccess(qrCodeMessage) {
+            document.getElementById('result').innerHTML = `<p>QR Code detected: ${qrCodeMessage}</p>`;
+            
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    document.getElementById('result').innerHTML += `<p>Latitude: ${latitude}</p><p>Longitude: ${longitude}</p>`;
+
+                    fetch('/scan_mark_attendance', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                            qr_code: qrCodeMessage,
+                            latitude: latitude,
+                            longitude: longitude
+                        })
+                    }).then(response => response.json())
+                      .then(data => {
+                          console.log(data);
+                          // Handle response from the server
+                      })
+                      .catch(error => {
+                          console.error('Error:', error);
+                      });
+                });
+            } else {
+                document.getElementById('result').innerHTML += "<p>Geolocation is not supported by your browser</p>";
+            }
+        }
+
+        const html5QrCode = new Html5Qrcode('qr-reader');
+        html5QrCode.start({ facingMode: 'environment' }, { fps: 10 }, onScanSuccess);
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!-- classroom_attendance_list.html -->
+
+{% extends 'base.html' %}
+{% block title %}Classroom Attendance List{% endblock %}
+
+{% block content %}
+  <h1>Classroom Attendance List - {{ classroom.name }}</h1>
+  {% if attendance_list %}
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for attendance in attendance_list %}
+          <tr>
+            <td>{{ attendance.student }}</td>
+            <td>{{ attendance.date }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No attendance records found for this classroom.</p>
+  {% endif %}
+{% endblock %}
