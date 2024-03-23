@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
+    <title>Login</title>
 </head>
 <body>
-    <h2>Register</h2>
+    <h2>Login</h2>
     <form method="post">
         {% csrf_token %}
-        {{ user_form.as_p }}
-        {{ profile_form.as_p }}
-        <button type="submit">Register</button>
+        {{ form.as_p }}
+        <button type="submit">Login</button>
     </form>
 </body>
 </html>

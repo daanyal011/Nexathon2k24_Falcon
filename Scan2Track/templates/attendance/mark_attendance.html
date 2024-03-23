@@ -8,19 +8,11 @@
     <h1>Mark Attendance</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <h2>{{ classroom.name }}</h2>
+        {% for student in students %}
+            <input type="checkbox" name="student_ids" value="{{ student.id }}"> {{ student.name }}<br>
+        {% endfor %}
         <button type="submit">Submit Attendance</button>
     </form>
-    <p>Classroom: {{ classroom.name }}</p>
-    <ul>
-        {% for student in students %}
-            <li>{{ student.user.username }}</li>
-        {% endfor %}
-    </ul>
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
 </body>
 </html>

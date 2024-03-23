@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generate QR Code</title>
+</head>
+<body>
+    <h1>Scan QR Code</h1>
+    <form id="scanForm" action="{% url 'mark_attendance' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="qr_code" name="qr_code">
+    </form>
+    <script>
+        window.onload = function() {
+            // Assuming you have a function to scan QR code and get the data
+            // Replace "scanQRCode()" with your actual function
+            var qrData = scanQRCode();  // Function to get QR code data
+            document.getElementById("qr_code").value = qrData;
+            document.getElementById("scanForm").submit();
+        };
+    </script>
+</body>
+</html>
