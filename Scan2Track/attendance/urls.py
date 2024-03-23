@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path('generate_qr/', views.generate_qr, name='generate_qr'),
-    path('mark_attendance/', views.mark_attendance, name='mark_attendance'),
+    path('scan_qr/', views.scan_qr, name='scan_qr'),
+    # Add other URLs as needed
 ]
