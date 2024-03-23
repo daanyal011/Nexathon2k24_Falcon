@@ -1,12 +1,17 @@
+
+# views.py
+import qrcode
+from django.http import HttpResponse
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Classroom, Student, Attendance
-from django.http import HttpResponse
+from .forms import QRScanForm, MarkAttendanceForm
 
 # View for generating QR code (accessible by teachers only)
 def generate_qr(request):
     # Check if the user is a teacher
-    if request.user.is_authenticated and request.user.is_teacher:
+    if request.user.is_authenticated and request.user.userprofile.is_teacher:
         if request.method == 'POST':
             classroom_id = request.POST.get('classroom_id')
             try:
@@ -28,16 +33,20 @@ def generate_qr(request):
 # View for scanning QR code and marking attendance (accessible by students)
 def scan_qr(request):
     if request.method == 'POST':
-        qr_code = request.POST.get('qr_code')
-        try:
-            classroom = Classroom.objects.get(qr_code=qr_code)
-            if request.user.is_authenticated and not request.user.is_teacher:
+        form = QRScanForm(request.POST)
+        if form.is_valid():
+            qr_code = form.cleaned_data['qr_code']
+            try:
+                classroom = Classroom.objects.get(qr_code=qr_code)
+                if not request.user.is_authenticated or request.user.userprofile.is_teacher:
+                    messages.error(request, 'You must be logged in as a student to mark attendance.')
+                    return redirect('login')
                 student = Student.objects.get(user=request.user)
                 Attendance.objects.create(student=student, classroom=classroom)
                 messages.success(request, 'Attendance marked successfully')
                 return redirect('attendance_success')
-            else:
-                messages.error(request, 'You must be logged in as a student to mark attendance.')
-        except Classroom.DoesNotExist:
-            messages.error(request, 'Invalid QR code')
-    return render(request, 'attendance/scan_qr.html')
+            except Classroom.DoesNotExist:
+                messages.error(request, 'Invalid QR code')
+    else:
+        form = QRScanForm()
+    return render(request, 'attendance/scan_qr.html', {'form': form})

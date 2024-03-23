@@ -1,5 +1,5 @@
 from django import forms
-from .models import Classroom, Student
+from .models import  Student
 
 class QRScanForm(forms.Form):
     qr_code = forms.CharField(max_length=100)
