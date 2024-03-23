@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import UserProfile
+
 class Classroom(models.Model):
     name = models.CharField(max_length=100)
     qr_code = models.CharField(max_length=100, unique=True)
@@ -11,6 +13,7 @@ class Classroom(models.Model):
         return self.name
 
 class Student(models.Model):
+    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
 

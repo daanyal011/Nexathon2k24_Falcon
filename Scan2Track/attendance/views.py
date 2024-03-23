@@ -29,8 +29,21 @@ def generate_qr(request):
         # Redirect to home or show error message
         messages.error(request, 'You must be logged in as a teacher to generate QR code.')
         return redirect('home')
+from users.models import UserProfile
+from django.core.exceptions import ObjectDoesNotExist
 
-# View for scanning QR code and marking attendance (accessible by students)
+from django.urls import reverse
+
+def classroom_attendance_list(request, classroom_id):
+    try:
+        classroom = Classroom.objects.get(pk=classroom_id)
+        attendance_list = Attendance.objects.filter(classroom=classroom)
+        return render(request, 'attendance/classroom_attendance_list.html', {'classroom': classroom, 'attendance_list': attendance_list})
+    except Classroom.DoesNotExist:
+        messages.error(request, 'Classroom does not exist')
+        return redirect('home')  # Redirect to home or another appropriate page
+from django.urls import reverse
+
 def scan_qr(request):
     if request.method == 'POST':
         form = QRScanForm(request.POST)
@@ -41,12 +54,20 @@ def scan_qr(request):
                 if not request.user.is_authenticated or request.user.userprofile.is_teacher:
                     messages.error(request, 'You must be logged in as a student to mark attendance.')
                     return redirect('login')
-                student = Student.objects.get(user=request.user)
-                Attendance.objects.create(student=student, classroom=classroom)
-                messages.success(request, 'Attendance marked successfully')
-                return redirect('attendance_success')
+                
+                try:
+                    student = Student.objects.get(user_profile__user=request.user)
+                    Attendance.objects.create(student=student, classroom=classroom)
+                    messages.success(request, 'Attendance marked successfully')
+                    # Redirect to classroom attendance list page with classroom_id as a query parameter
+                    return redirect(reverse('classroom_attendance_list') + f'?classroom_id={classroom.id}')
+                except Student.DoesNotExist:
+                    messages.error(request, 'You are not registered as a student.')
+                    
             except Classroom.DoesNotExist:
                 messages.error(request, 'Invalid QR code')
+
     else:
         form = QRScanForm()
     return render(request, 'attendance/scan_qr.html', {'form': form})
+
